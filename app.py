@@ -43,18 +43,17 @@ def check_html_accessibility():
         response.append(lang_err)
 
     # Check the title.
-    is_over_10_chars = len(input_string) > 10
+    title_err = check_title(input_string)
+    if title_err:
+        response.append(title_err)
 
     # Check the color contrast.
     is_over_10_chars = len(input_string) > 10
 
-    # Check the img alt attribute.
+    # Check the img alt attribute and length.
     alt_err = check_img_alt(input_string)
     if alt_err:
-        response.append(alt_err)
-
-    # Check the img alt length.
-    is_over_10_chars = len(input_string) > 10
+        response.extend(alt_err)
 
     # Check meaningful link text.
     link_err = check_link_text(input_string)
@@ -67,7 +66,9 @@ def check_html_accessibility():
         response.append(h1_err)
 
     # Check the heading heirarchy.
-    is_over_10_chars = len(input_string) > 10
+    header_err = check_headers(input_string)
+    if header_err:
+        response.extend(header_err)
 
     # Return the result as a JSON object.
     return jsonify(response), 200
@@ -83,23 +84,48 @@ def check_lang(input_string):
         }
     return
 
+def check_title(input_string):
+    title = re.search(r"<title>\S*?</title>", input_string)
+    if not title:
+        return {
+            "problem": "Missing Title",
+            "element": "<title>",
+            "details": "Every page must have a non-empty <title> tag.",
+            "rule": "DOC_TITLE_MISSING"
+        }
+    return
+
 def check_img_alt(input_string):
-    count = 0
+    result = []
+    miss_count = 0
+    len_count = 0
     img_tags = re.findall(r"<img.*?>", input_string)
 
     for img in img_tags:
-        if not re.search(r"alt=(""|')\S('|"")", img):
-            count+= 1
-    
-    if count:
-        return {
-                "problem": "Missing 'alt' Text",
-                "element": "<img>",
-                "details": "Informative images must have a descriptive 'alt' attribute.",
-                "rule": "IMG_ALT_MISSING",
-                "instances": count
-            }
-    return
+        alt_text = re.search(r"alt=(""|')\S('|"")", img)
+        if not alt_text:
+            miss_count += 1
+        elif len(alt_text) > 120:
+            len_count += 1
+ 
+    if miss_count:
+        result.append({
+            "problem": "Missing 'alt' Text",
+            "element": "<img>",
+            "details": "Informative images must have a descriptive 'alt' attribute.",
+            "rule": "IMG_ALT_MISSING",
+            "instances": miss_count
+        })
+    if len_count:
+        result.append({
+            "problem": "'alt' Text Too Long",
+            "element": "<img>",
+            "details": "The 'alt' attribute text should not exceed 120 characters.",
+            "rule": "IMG_ALT_LENGTH",
+            "instances": len_count
+        })
+
+    return result
 
 
 def check_link_text(input_string):
@@ -129,10 +155,32 @@ def check_h1(input_string):
         }
     return
 
+def check_headers(input_string):
+    result = []
+    headers = re.findall(r"<h([1|2|3|4|5|6])", input_string)
     
+    if headers[0] != 1:
+        result.append({
+            "problem": "Skipped Heading Level",
+            "element": "<h" + headers[0]+ ">",
+            "details": "Pages should start with <h1>. <h" + headers[0]+ "> should not be used until all lower heading levels appear first.",
+            "rule": "HEADING_ORDER"
+        })
+    
+    for index in range(1, len(headers)):
+        if int(headers[index]) - int(headers[index - 1]) > 1:
+            result.append({
+                "problem": "Skipped Heading Level",
+                "element": "<h" + headers[index - 1]+ ">, <h" + headers[index] + ">",
+                "details": "The <h" + headers[index -1 ] +"> element is followed by <h" + headers[index] + ">. The heading level(s) in between should not be skipped.",
+                "rule": "HEADING_ORDER"
+            })
+
+    return result
 
 # This block ensures the Flask development server runs only when the script is executed directly.
 if __name__ == '__main__':
+
     # Run the Flask application in debug mode for development.
     # In a production environment, you would use a production-ready WSGI server.
     app.run(debug=True)
