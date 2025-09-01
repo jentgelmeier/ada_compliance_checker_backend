@@ -97,10 +97,10 @@ def check_headers(input_string):
     headers = re.findall(r"<h([1|2|3|4|5|6])", input_string)
     
     # Check if the first heading is <h1>
-    if headers[0] != 1:
+    if len(headers) and headers[0] != 1:
         violations.append({
             "problem": "Skipped Heading Level",
-            "element": "<h" + headers[0]+ ">",
+            "element": "<h" + (headers[0] if headers[0] else "1") + ">",
             "details": "Pages should start with <h1>. <h" + headers[0]+ "> should not be used until all lower heading levels appear first.",
             "rule": "HEADING_ORDER"
         })

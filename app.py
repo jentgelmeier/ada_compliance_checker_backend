@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import cross_origin
 
 from ada_checks import check_h1, check_headers, check_lang, check_title, check_img_alt, check_link_text
 from contrast_check import check_contrast_ratio
@@ -19,6 +20,7 @@ def home():
 
 # This endpoint will respond to POST requests to '/api/v1/ada-check'.
 @app.route('/api/v1/ada-check', methods=['POST'])
+@cross_origin()
 def check_html_accessibility():
     """
     Receives a JSON object with an 'html' string and returns
