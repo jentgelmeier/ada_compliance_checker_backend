@@ -5,7 +5,7 @@ def check_lang(input_string):
     Searches for <html>. If there is no <html> or the lang attribute is empty, returns JSON message with info about the error.
     """
     html = re.search(r"<html.*?>", input_string)
-    if not html or not re.search(r"lang=(""|')\w('|"")", html.group()):
+    if not html or not re.search(r"lang=['\"](\w+)['\"]", html.group()):
         return {
             "problem": "Missing 'lang' Attribute",
             "element": "<html>",
