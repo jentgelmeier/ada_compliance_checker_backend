@@ -5,7 +5,7 @@ def check_lang(input_string):
     Searches for <html>. If there is no <html> or the lang attribute is empty, returns JSON message with info about the error.
     """
     html = re.search(r"<html.*?>", input_string)
-    if not html or not re.search(r"lang=['\"](\w+)['\"]", html.group()):
+    if not html or not re.search(r"lang=['\"](\S+)['\"]", html.group()):
         return {
             "problem": "Missing 'lang' Attribute",
             "element": "<html>",
@@ -36,7 +36,7 @@ def check_img_alt(input_string):
 
     # For each img, look for missing/empty alt attribute or alt attribute that is too long
     for img in img_tags:
-        alt_text = re.search(r"alt=(""|')\S*('|"")", img)
+        alt_text = re.search(r"alt=(['\"]\S+['\"])", img)
         if not alt_text:
             violations.append({
             "problem": "Missing 'alt' Text",
@@ -44,7 +44,7 @@ def check_img_alt(input_string):
             "details": "Informative images must have a descriptive 'alt' attribute.",
             "rule": "IMG_ALT_MISSING",
         })
-        elif len(alt_text.group()) > 120:
+        elif len(alt_text.group(1)) > 120:
             violations.append({
             "problem": "'alt' Text Too Long",
             "element": img,
@@ -97,7 +97,7 @@ def check_headers(input_string):
     headers = re.findall(r"<h([1|2|3|4|5|6])", input_string)
     
     # Check if the first heading is <h1>
-    if len(headers) and headers[0] != 1:
+    if len(headers) and headers[0] != '1':
         violations.append({
             "problem": "Skipped Heading Level",
             "element": "<h" + (headers[0] if headers[0] else "1") + ">",

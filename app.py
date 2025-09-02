@@ -16,7 +16,7 @@ def home():
     Handles requests to the home page.
     Returns a simple greeting message.
     """
-    return "<h1>Welcome to the Flask API!</h1><p>Try /api/ada_check to check if your html meets accessibility standards.</p>"
+    return "<h1>Welcome to the Flask API!</h1><p>Try /api/v1/ada-check to check if your html meets accessibility standards.</p>"
 
 # This endpoint will respond to POST requests to '/api/v1/ada-check'.
 @app.route('/api/v1/ada-check', methods=['POST'])
@@ -53,7 +53,6 @@ def check_html_accessibility():
 
     # Check the color contrast.
     contrast_err = check_contrast_ratio(input_string)
-    print('ce', contrast_err)
     if contrast_err:
         response.extend(contrast_err)
 

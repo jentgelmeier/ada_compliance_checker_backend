@@ -269,7 +269,6 @@ def check_contrast_ratio(html_string):
         fg_tuple = fg_color if fg_color else (default_text_color[0], default_text_color[1], default_text_color[2], 255)
         bg_tuple = bg_color if bg_color else (default_bg_color[0], default_bg_color[1], default_bg_color[2], 255)
 
-        # print(element.name, fg_color)
         # Default font-weight to 400
         if not font_weight:
             font_weight = 400
@@ -322,29 +321,3 @@ def check_contrast_ratio(html_string):
             })
             
     return violations
-
-# --- Example Usage ---
-html_content = """
-<html>
-<head>
-    <style>
-        p {
-            color: white;
-        }
-        #intro {
-            background-color: #f0f0f0;
-        }
-    </style>
-</head>
-<body>
-    <div style='background-color: #f0f0f0;'>
-        <h1>Good Contrast</h1>
-        <p>This paragraph has good contrast on a light background.</p>
-    </div>
-    <div style='background-color: #87cefa;'>
-        <p style='color: #6495ED; font-size: 18px'>This paragraph has poor contrast.</p>
-        <span style='color: #ff00ff; font-size: 20em;'>This span also has poor contrast.</span>
-    </div>
-</body>
-</html>
-"""
