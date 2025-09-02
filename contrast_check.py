@@ -206,12 +206,9 @@ def calculate_contrast_ratio(rgb1, rgb2):
 
 def check_contrast_ratio(html_string):
     """
-    Analyzes an HTML string for color contrast violations.
-
-    Args:
-        html_string (str): The HTML content to analyze.
-        min_ratio (float): The minimum contrast ratio to pass. Default is 3.0,
-                           which corresponds to WCAG 2.1 AA for large text.
+    Analyzes an HTML string for color contrast violations. Unable to read font-sizes if they aren't in pixels.
+    The function accounts for font-size, font-weight, and color to determine contrast ratios. 
+    It will convert styles in a style tag to inline styles to determine contrast ratios.
 
     Returns:
         list: A list of dictionaries, where each dictionary represents an element
