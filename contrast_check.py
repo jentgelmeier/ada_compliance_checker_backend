@@ -75,10 +75,11 @@ W3C_COLORS = {
     "snow": [255, 250, 250], "springgreen": [0, 255, 127],
     "steelblue": [70, 130, 180], "tan": [210, 180, 140],
     "teal": [0, 128, 128], "thistle": [216, 191, 216],
-    "tomato": [255, 99, 71], "turquoise": [64, 224, 208],
-    "violet": [238, 130, 238], "wheat": [245, 222, 179],
-    "white": [255, 255, 255], "whitesmoke": [245, 245, 245],
-    "yellow": [255, 255, 0], "yellowgreen": [154, 205, 50]
+    "tomato": [255, 99, 71], "transparent": [0, 0, 0],
+    "turquoise": [64, 224, 208], "violet": [238, 130, 238],
+    "wheat": [245, 222, 179], "white": [255, 255, 255],
+    "whitesmoke": [245, 245, 245], "yellow": [255, 255, 0],
+    "yellowgreen": [154, 205, 50]
 }
 
 
@@ -107,6 +108,8 @@ def apply_styles_to_inline(html_string):
         for rule in parsed_rules:
             if rule.type == 'qualified-rule':
                 selector = tinycss2.serialize(rule.prelude).strip()
+                if re.search(r':(?!root)', selector):
+                    continue
                 styles_to_apply = {}
                 declarations = tinycss2.parse_blocks_contents(rule.content)
                 for declaration in declarations:
@@ -151,7 +154,7 @@ def parse_color(color_string):
         return tuple(rgb) + (255,)
     
     # Hex with alpha (#RRGGBBAA) or without (#RRGGBB)
-    hex_match = re.fullmatch(r'#?([0-9a-fA-F]{6}|[0-9a-fA-F]{8})', color_string)
+    hex_match = re.fullmatch(r'#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})', color_string)
     if hex_match:
         hex_color = hex_match.group(1)
         r = int(hex_color[0:2], 16)
@@ -161,7 +164,7 @@ def parse_color(color_string):
         return (r, g, b, a)
 
     # RGB or RGBA format
-    rgba_match = re.fullmatch(r'rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', color_string)
+    rgba_match = re.fullmatch(r'rgba?\(\s*(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})(?:\s*[\/,]\s*([\d.]+))?\s*\)', color_string)
     if rgba_match:
         r, g, b = [int(c) for c in rgba_match.group(1, 2, 3)]
         a = float(rgba_match.group(4)) if rgba_match.group(4) else 1.0
@@ -265,9 +268,11 @@ def check_contrast_ratio(html_string):
         fg_tuple = fg_color if fg_color else (default_text_color[0], default_text_color[1], default_text_color[2], 255)
         bg_tuple = bg_color if bg_color else (default_bg_color[0], default_bg_color[1], default_bg_color[2], 255)
 
-        # Default font-weight to 400
-        if not font_weight:
-            font_weight = 400
+        # Convert font weight to integer. If none found, default to 400
+        if font_weight:
+            if font_weight.isdigit(): font_weight = int(font_weight)
+            elif font_weight == "bold": font_weight = 700
+            else: font_weight = 400
         
         # Use large text ratio if no font-size given for h1-h4 headings
         if not font_size:
@@ -284,12 +289,13 @@ def check_contrast_ratio(html_string):
             unknown_fs = True
         else:
             # Extract just the number to compare size
-            fs_digits = re.search(r'(\d+)\s*px', font_size)
+            fs_digits = re.search(r'(\d*\.?\d+)\s*px', font_size)
 
-            if element.name in ["strong", "b"] or font_weight == "bold" or int(font_weight) >= 700:
-                if int(fs_digits.group(1)) >= 18.5: # If the font is bold and bigger than 18.5px, it's considered large text
+            #font-weight css trumps so only consider <strong> and <b> if no font-weight set
+            if (font_weight and font_weight >= 700) or (not font_weight and element.name in ["strong", "b"]):
+                if float(fs_digits.group(1)) >= 18.66: # If the font is bold and bigger than 18.66px, it's considered large text
                     min_ratio = large_text_min_ratio
-            elif int(fs_digits.group(1)) >= 24: # Normal font is considered large if its bigger than 24px
+            elif float(fs_digits.group(1)) >= 24: # Normal font is considered large if its bigger than 24px
                 min_ratio = large_text_min_ratio
 
 
@@ -303,7 +309,7 @@ def check_contrast_ratio(html_string):
         ratio = calculate_contrast_ratio(final_fg_rgb, (bg_tuple[0], bg_tuple[1], bg_tuple[2]))
 
         if ratio < min_ratio:
-            details = f"Unable to determine font-size. The contrast ratio is {round(ratio, 2)}. This is okay for large text, but the minimum required for normal text is {min_ratio}." \
+            details = f"Unable to determine font-size. The contrast ratio is {round(ratio, 2)}. This is okay for large text (unbolded text ≥ 18 pt [~24 pixels] or bold text ≥ 14 pt [~18.66 pixels]), but the minimum required for normal text is {min_ratio}." \
                         if unknown_fs and ratio > 3 \
                         else f"The contrast ratio is {round(ratio, 2)}. The minimum required for {"normal" if min_ratio == 4.5 else "large"} text is {min_ratio}."
             violations.append({

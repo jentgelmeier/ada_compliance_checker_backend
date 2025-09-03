@@ -301,7 +301,7 @@ class TestAPIEndpoints(unittest.TestCase):
         },
         {
             "background_color": "rgb(240, 240, 240)",
-            "details": "Unable to determine font-size. The contrast ratio is 3.05. This is okay for large text, but the minimum required for normal text is 4.5.",
+            "details": "Unable to determine font-size. The contrast ratio is 3.05. This is okay for large text (unbolded text ≥ 18 pt [~24 pixels] or bold text ≥ 14 pt [~18.66 pixels]), but the minimum required for normal text is 4.5.",
             "element": "<span class=\"test\" style=\"color: rgba(102, 111, 255, .9); font-size: 20em; font-weight: 700\">This span's font size can't be determined.</span>",
             "foreground_color": "rgb(116, 124, 253)",
             "problem": "Low Contrast Ratio",

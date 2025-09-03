@@ -5,7 +5,7 @@ def check_lang(input_string):
     Searches for <html>. If there is no <html> or the lang attribute is empty, returns JSON message with info about the error.
     """
     html = re.search(r"<html.*?>", input_string)
-    if not html or not re.search(r"lang=['\"](\S+)['\"]", html.group()):
+    if not html or not re.search(r"lang=['\"][a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*['\"]", html.group()):
         return {
             "problem": "Missing 'lang' Attribute",
             "element": "<html>",
@@ -94,7 +94,7 @@ def check_headers(input_string):
     returns a JSON message with the appropriate error info
     """
     violations = []
-    headers = re.findall(r"<h([1|2|3|4|5|6])", input_string)
+    headers = re.findall(r"<h([1-6])", input_string)
     
     # Check if the first heading is <h1>
     if len(headers) and headers[0] != '1':
