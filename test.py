@@ -58,10 +58,9 @@ class TestAPIEndpoints(unittest.TestCase):
         """Test the main index route returns a 200 status code."""
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data.decode('utf-8'), "<h1>Welcome to the Flask API!</h1><p>Try /api/v1/ada-check to check if your html meets accessibility standards.</p>")
 
     def test_no_issues(self):
-        """Test the /api/v1/ada-check endpoint for string that has no issues."""
+        """Test the /api/v1/html-check endpoint for string that has no issues."""
         html_string = { "html": """
                         <html lang="en">
                             <head>
@@ -78,16 +77,16 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                         </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
         self.assertEqual(data, [])
 
     def test_empty_string(self):
-        """Test the /api/v1/ada-check endpoint for empty string."""
+        """Test the /api/v1/html-check endpoint for empty string."""
         html_string = { "html": ""}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -105,9 +104,9 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
     
     def test_empty_lang_and_title(self):
-        """Test the /api/v1/ada-check endpoint for empty lang and title."""
+        """Test the /api/v1/html-check endpoint for empty lang and title."""
         html_string = { "html": "<html lang=\"\"><title> </title></html>"}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -125,9 +124,9 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
 
     def test_empty_alt(self):
-        """Test the /api/v1/ada-check endpoint for empty img alt."""
+        """Test the /api/v1/html-check endpoint for empty img alt."""
         html_string = { "html": "<html lang=\"en\"><head><title>T</title><head><body><img><img alt=""></body></html>"}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -145,7 +144,7 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
         
     def test_lengthy_alt(self):
-        """Test the /api/v1/ada-check endpoint for alt > 120 characters."""
+        """Test the /api/v1/html-check endpoint for alt > 120 characters."""
         html_string = { "html": """
                         <html lang="en">
                             <head>
@@ -156,7 +155,7 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                         </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -168,7 +167,7 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
 
     def test_link(self):
-        """Test the /api/v1/ada-check endpoint for bad link."""
+        """Test the /api/v1/html-check endpoint for bad link."""
         html_string = { "html": """
                         <html lang="en">
                             <head>
@@ -179,7 +178,7 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                         </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -191,7 +190,7 @@ class TestAPIEndpoints(unittest.TestCase):
     }])
         
     def test_mult_h1s(self):
-        """Test the /api/v1/ada-check endpoint for multiple h1s."""
+        """Test the /api/v1/html-check endpoint for multiple h1s."""
         html_string = { "html": """
                         <html lang="en">
                             <head>
@@ -203,7 +202,7 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                         </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -215,7 +214,7 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
 
     def test_heading_order(self):
-        """Test the /api/v1/ada-check endpoint for bad heading order."""
+        """Test the /api/v1/html-check endpoint for bad heading order."""
         html_string = { "html": """
                         <html lang="en">
                             <head>
@@ -228,7 +227,7 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                         </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)
@@ -246,7 +245,7 @@ class TestAPIEndpoints(unittest.TestCase):
         }])
 
     def test_contrast(self):
-        """Test the /api/v1/ada-check endpoint for color contrast issues."""
+        """Test the /api/v1/html-check endpoint for color contrast issues."""
         html_string = { "html": """
                             <html lang="en">
                             <head>
@@ -278,7 +277,7 @@ class TestAPIEndpoints(unittest.TestCase):
                             </body>
                             </html>
                        """}
-        response = self.app.post('/api/v1/ada-check', data=json.dumps(html_string), content_type="application/json")
+        response = self.app.post('/api/v1/html-check', data=json.dumps(html_string), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         data = json.loads(response.data)

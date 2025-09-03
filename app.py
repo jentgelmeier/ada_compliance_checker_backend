@@ -99,10 +99,20 @@ def check_url():
     if not request_data or 'url' not in request_data:
         return jsonify({"message": "Invalid request: JSON object with 'url' key required"}), 400
     
-    # Grab the html from the provided url
+    # check if url is valid
     url = request_data['url']
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+    except:
+        # If urlparse throws a ValueError, the URL is invalid.
+        return jsonify({"message": "Please provide a valid URL. Be sure it begins with http:// or https://"})
+    
+    # Grab the html from the provided url
     input_string = response.text
+    
+    # check input_string contains html
+    if not "<html" in input_string:
+        return jsonify({"message": "Could not retreive HTML from the provided URL. Please try a different URL."})
 
     return check_html_accessibility(input_string)
 

@@ -140,7 +140,7 @@ def apply_styles_to_inline(html_string):
         except Exception as e:
             print(f"Warning: Could not select elements for '{rule['selector']}'. Error: {e}")
 
-    return str(soup)
+    return soup
  
 def parse_color(color_string):
     """Converts a color string (hex, rgb, rgba, name) to an RGBA tuple."""
@@ -214,8 +214,7 @@ def check_contrast_ratio(html_string):
         list: A list of dictionaries, where each dictionary represents an element
               that failed the contrast check.
     """
-    inline_html = apply_styles_to_inline(html_string)
-    soup = BeautifulSoup(inline_html, 'html.parser')
+    soup = apply_styles_to_inline(html_string)
     violations = []
     
     default_text_color = (0, 0, 0)      # black
