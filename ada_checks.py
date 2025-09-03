@@ -17,7 +17,7 @@ def check_title(input_string):
     """
     Searches for <title>. If there is no <title> or there is no text in the <title>, returns JSON message with info about the error.
     """
-    title = re.search(r"<title>\S*?</title>", input_string)
+    title = re.search(r"<title.*?>\s*?\S+.*?</title>", input_string)
     if not title:
         return {
             "problem": "Missing Title",
