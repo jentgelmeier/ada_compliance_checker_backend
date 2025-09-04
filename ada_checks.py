@@ -2,12 +2,12 @@ import re
 
 def check_lang(input_string):
     """
-    Searches for <html>. If there is no <html> or the lang attribute is empty, returns JSON message with info about the error.
+    Searches for <html>. If there is no <html> or the lang attribute is empty or invalid, returns JSON message with info about the error.
     """
     html = re.search(r"<html.*?>", input_string)
     if not html or not re.search(r"lang=['\"][a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*['\"]", html.group()):
         return {
-            "problem": "Missing 'lang' Attribute",
+            "problem": "Missing valid 'lang' Attribute",
             "element": "<html>",
             "details": "The document's primary language is not declared.",
             "rule": "DOC_LANG_MISSING"
